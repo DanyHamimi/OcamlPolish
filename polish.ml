@@ -8,7 +8,7 @@
 (*****************************************************************************)
 (** Syntaxe abstraite Polish (types imposés, ne pas changer sauf extensions) *)
 
-(** Position : numéro de line dans le fichier, débutant à 1 *)
+(** Position : numéro de ligne dans le fichier, débutant à 1 *)
 type position = int
 
 (** Nom de variable *)
