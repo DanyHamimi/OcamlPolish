@@ -1,16 +1,44 @@
 Modalités de rendu du projet et évaluations
 ===========================================
 
+### Modalités du projet ###
+
+Le projet est à traiter en groupes de 2 personnes au plus (les
+projets soumis par des groupes de 3 personnes ou plus ne seront pas
+acceptés).
+
+Le travail doit être réalisé via un dépôt git pour chaque groupe.
+L'usage de ce gestionnaire de versions (VCS) permet d'éviter
+toute perte de donnée, et d'accéder si besoin à vos anciennes
+versions. Ceci nous permettra aussi de garder la trace et les dates
+de vos contributions, de vérifier la régularité de votre travail et son
+équilibrage.
+
+Votre dépôt git doit être hébergé par le serveur GitLab de l'UFR d'informatique :
+https://gaufre.informatique.univ-paris-diderot.fr
+Voir le fichier [GIT.md](GIT.md) pour plus de détails sur son usage.
+Aucun autre code ne sera pris en compte, même hébergé par un autre serveur.
+Votre dépôt doit être rendu **privé** dès sa création, avec accès uniquement
+aux membres du binôme et aux enseignants de ce cours (groupe git pf5-profs).
+Tout code laissé en accès libre sur Gaufre ou ailleurs sera considéré
+comme une incitation à la fraude, et sanctionné.
+
+Il va de soi que votre travail doit être strictement personnel :
+aucune communication de code ou d'``idées'' entre les groupes,
+aucune ``aide'' externe ou entre groupes. Nous vous rappelons
+que la fraude à un projet est aussi une fraude à un examen, passible
+de sanctions disciplinaires pouvant aller jusqu'a l'exclusion définitive
+de toute université.
+
 ### Modalités de rendu ###
 
-Ce projet est organisé en deux rendus, le premier le 15/12/2021 et
-le second le 10/01/2022. Nous prendrons en compte l'état de vos
-dépôts git à minuit à ces dates. Evidemment, vos dépôts git doivent
-être lisibles par l'équipe enseignante (groupe git pf5-profs), mais
-*pas* par tous (visibilité privée). Voir le sujet du projet pour
-plus de détails. Attention, nous considérerons uniquement la branche
-"master" de vos dépôts, pensez à fusionner vos éventuelles branches
-de développement dans "master".
+Ce projet est organisé en deux rendus, le premier le 15/12/2021 et le
+second le 10/01/2022. Nous prendrons en compte l'état de vos dépôts
+git à minuit à ces dates. Attention, nous considérerons uniquement
+la branche "master" de vos dépôts, pensez à fusionner vos
+éventuelles branches de développement dans "master".
+Attention à ce que vos dépôts soient bien lisibles par l'équipe
+enseignante (groupe git pf5-profs) mais *pas* par tous (visibilité privée). 
 
 ### Rapport.txt ###
 
@@ -30,7 +58,8 @@ formalité : il sera pris en compte dans l'évaluation.
 
 3. (Compilation et exécution)
    Documentez ensuite de façon précise la manière dont votre
-   projet doit être compilé et exécuté. Précisez si vous vous êtes
+   projet doit être compilé (normalement via dune) et exécuté (en donnant
+   les options acceptées par votre programme). Précisez si vous vous êtes
    servi de bibliothèques externes, et donnez dans ce cas un pointeur
    vers leur documentation.
 
