@@ -5,7 +5,7 @@ Projet PF5 2021 : Polish
 
 Voir [projet.pdf](projet.pdf)
 
-## Modalités de rendu et d'évaluation
+## Modalités du projet, des rendus et de l'évaluation
 
 Voir [CONSIGNES.md](CONSIGNES.md)
 
