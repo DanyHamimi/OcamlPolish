@@ -134,9 +134,9 @@ peuvent être intégrées à vos dépôts.
 La première fois, aller dans votre répertoire de travail sur votre machine,
 et taper:
 
-"`
+```
 git remote add prof git@gaufre.informatique.univ-paris-diderot.fr:pf5-profs/pf5-projet.git
-"`
+```
 
 Ensuite, à chaque fois que vous souhaiterez récupérer des commits du dépôt
 enseignant : `git pull prof master` .
