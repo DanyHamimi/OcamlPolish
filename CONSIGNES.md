@@ -19,7 +19,8 @@ https://gaufre.informatique.univ-paris-diderot.fr
 Voir le fichier [GIT.md](GIT.md) pour plus de détails sur son usage.
 Aucun autre code ne sera pris en compte, même hébergé par un autre serveur.
 Votre dépôt doit être rendu **privé** dès sa création, avec accès uniquement
-aux membres du binôme et aux enseignants de ce cours (groupe git `pf5-profs`).
+aux membres du binôme et aux enseignants de ce cours (au minimum l'utilisateur
+`letouzey` comme Maintaineur).
 Tout code laissé en accès libre sur Gaufre ou ailleurs sera considéré
 comme une incitation à la fraude, et sanctionné.
 
@@ -38,7 +39,8 @@ git à minuit à ces dates. Attention, nous considérerons uniquement
 la branche "master" de vos dépôts, pensez à fusionner vos
 éventuelles branches de développement dans "master".
 Attention à ce que vos dépôts soient bien lisibles par l'équipe
-enseignante (groupe git pf5-profs) mais *pas* par tous (visibilité privée). 
+enseignante (ajouter au moins l'utilisateur `letouzey` comme Maintainer)
+mais *pas* par tous (visibilité privée).
 
 ### Rapport.txt ###
 

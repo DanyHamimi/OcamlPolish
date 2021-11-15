@@ -50,8 +50,8 @@ cours. En pratique:
 
   - Toujours dans "Settings" en bas à gauche, mais sous-section "Members"
     maintenant. "Invitez" votre collègue de projet en choissant
-    "Maintainer" comme rôle, et invitez également le groupe `pf5-profs`
-    comme "Maintainer" (via l'onglet "Invite Group" en haut à droite).
+    "Maintainer" comme rôle, ainsi également que l'utilisateur
+    `letouzey`, également comme "Maintainer".
 
   - Voilà, votre dépôt sur le GitLab est prêt !
 
