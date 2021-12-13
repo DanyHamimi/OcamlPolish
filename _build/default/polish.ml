@@ -10,6 +10,7 @@
 
 open Printf
 
+
 (** Position : numéro de ligne dans le fichier, débutant à 1 *)
 type position = int
 
@@ -54,7 +55,7 @@ type program = block
 
                  
 
-let readtest (name:string) : string list =
+let myread (name:string) : string list =
   let ic = open_in name in
   let try_read () =
     try Some (input_line ic) with End_of_file -> None in
@@ -62,6 +63,7 @@ let readtest (name:string) : string list =
     | Some s -> loop (s :: acc)
     | None -> close_in ic; List.rev acc in
   loop []
+
 
 
 let t = "testest"
@@ -76,11 +78,26 @@ let usage () =
   print_string "Polish : analyse statique d'un mini-langage\n";
   print_string "usage: à documenter (TODO)\n"
 
-let printList (st) = List.iter(printf "%s\n") st
+let myprint s =  printf "%s " s
+
+
+
+let getListWord s = String.split_on_char (' ') s (*list de tout les mots de s*)
+let printList (s) = List.iter (myprint) (getListWord(s))
+let rec print_list_string myList i= match myList with
+  | [] -> print_endline "Fin de fichier"
+  | head::body -> 
+    begin
+    printf "%i: " i;
+    printList head;
+    printf "\n";
+    print_list_string (body) (i+1)
+    end
+    ;;
 
 let main () =
   match Sys.argv with
-  | [|_;"-reprint";file|] -> printList(readtest(file))
+  | [|_;"-reprint";file|] -> print_list_string(myread(file)) (1)
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
   | _ -> usage()
 
