@@ -82,14 +82,43 @@ let myprint s =  printf "%s " s
 
 
 
+
+
 let getListWord s = String.split_on_char (' ') s (*list de tout les mots de s*)
+let printFirstWord s = List.hd(getListWord(s))
+  
+
+let cmd s = match s with
+  | "COMMENT" -> print_endline "sup"
+  | "READ" -> print_endline "lecture"
+  | "IF" -> print_endline "si"
+  | "ELSE" -> print_endline "sinon"
+  | "WHILE" -> print_endline "Pendant"
+  | " " -> print_endline "1 espace"
+  | "\t" -> print_endline "2 espace"
+  | "" -> print_string "rien"
+  | _ -> print_string "rien"
+  
+let rec getFristCmd l j= match l with
+  | [] -> print_endline "-ligne vide-"
+  | head::body -> 
+    begin
+      match head with
+        |" " -> getFristCmd (body) (j+1)
+        |"" -> getFristCmd body (j+1)
+        | _ -> printf "%s                   nombre d'espace: %i" head (j/2)
+    end
+    ;;
+
+
 let printList (s) = List.iter (myprint) (getListWord(s))
 let rec print_list_string myList i= match myList with
   | [] -> print_endline "Fin de fichier"
   | head::body -> 
     begin
     printf "%i: " i;
-    printList head;
+    (*cmd(printFirstWord (head));*)
+    getFristCmd (getListWord(head)) (0);
     printf "\n";
     print_list_string (body) (i+1)
     end
