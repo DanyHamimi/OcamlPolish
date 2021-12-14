@@ -1,10 +1,10 @@
-# dune exec -- ./polish.exe -reprint exemples/factors.p
+# dune build polish.exe
 # OCAMLPARAM: unset
 # Workspace root: /home/rayane/DEV/Ocaml/pf5-projet
-$ /usr/bin/nproc > /tmp/dune133801.output 2> /dev/null
+$ /usr/bin/nproc > /tmp/dune5ed253.output 2> /dev/null
 # Auto-detected concurrency: 6
 # disable binary cache
-$ /usr/bin/ocamlc.opt -config > /tmp/dunec8daba.output
+$ /usr/bin/ocamlc.opt -config > /tmp/dunec82158.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -107,4 +107,6 @@ $ /usr/bin/ocamlc.opt -config > /tmp/dunec8daba.output
 #      ; windows_unicode = false
 #      }
 #  }
-# Workspace root: /home/rayane/DEV/Ocaml/pf5-projet
+$ (cd _build/default && /usr/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -keep-locs -w -27-26-32-33 -g -bin-annot -I .polish.eobjs/byte -no-alias-deps -opaque -o .polish.eobjs/byte/dune__exe__Polish.cmo -c -impl polish.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -keep-locs -w -27-26-32-33 -g -I .polish.eobjs/byte -I .polish.eobjs/native -intf-suffix .ml -no-alias-deps -opaque -o .polish.eobjs/native/dune__exe__Polish.cmx -c -impl polish.ml)
+$ (cd _build/default && /usr/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -keep-locs -w -27-26-32-33 -g -o polish.exe .polish.eobjs/native/dune__exe__Polish.cmx)

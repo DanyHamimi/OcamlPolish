@@ -104,11 +104,42 @@ let rec getFristCmd l j= match l with
   | head::body -> 
     begin
       match head with
-        |" " -> getFristCmd (body) (j+1)
         |"" -> getFristCmd body (j+1)
         | _ -> printf "%s                   nombre d'espace: %i" head (j/2)
     end
     ;;
+
+
+
+(*let retRead List = Rea*)
+
+
+let ifStatement (fileString:string list) (pos:int)
+
+let rec returnPrgm(fileString:string list) (pos:int) : program =
+  match fileString with
+  |[]->[]
+  |head::body->
+    match getListWord(head) with
+      |[]->  failwith("marche pas")
+      |h::t->
+        match h with
+          | "COMMENT" -> returnPrgm(body) (pos+1)
+          | "READ" ->  [pos,Read "toto"]@returnPrgm(body) (pos+1)
+          | "PRINT" -> [pos,]@returnPrgm(body) (pos+1)
+          | "IF"
+          | "WHILE"
+          | _ -> failwith("marche pas")
+          
+      
+  
+
+(*let readPers (filename:string) : program =
+  let line = 1 in
+    match myread(filename) with
+      | [] -> []
+      | _ -> []*)
+       
 
 
 let printList (s) = List.iter (myprint) (getListWord(s))
@@ -117,16 +148,17 @@ let rec print_list_string myList i= match myList with
   | head::body -> 
     begin
     printf "%i: " i;
-    (*cmd(printFirstWord (head));*)
     getFristCmd (getListWord(head)) (0);
     printf "\n";
     print_list_string (body) (i+1)
     end
     ;;
 
+
+
 let main () =
   match Sys.argv with
-  | [|_;"-reprint";file|] -> print_list_string(myread(file)) (1)
+  | [|_;"-reprint";file|] -> print_polish (read_polish file)
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
   | _ -> usage()
 
