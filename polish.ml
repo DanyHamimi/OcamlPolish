@@ -50,7 +50,10 @@ and block = (position * instr) list
 (** Un programme Polish est un bloc d'instructions *)
 type program = block
 
-
+(*quand t as un if t'ouvres nouveau bloc et tu lis les instructions après ca commence par un if et ca se termine 
+1: n
+2: lt n 0 (1 val Sub 0 n) (n)
+3: n*)
 (***********************************************************************)
 
                  
@@ -66,9 +69,12 @@ let myread (name:string) : string list =
 
 
 
-let t = "testest"
+(*let create_blocs (name:string list) : program = let program = 
+let block = (let position = 1 let instr = name);;*)
 
-let read_polish (filename:string) : program = failwith (t)
+
+
+let read_polish (filename:string) : program = failwith "TODO"
 
 let print_polish (p:program) : unit = failwith "TODO"
 
@@ -88,13 +94,20 @@ let rec print_list_string myList i= match myList with
   | [] -> print_endline "Fin de fichier"
   | head::body -> 
     begin
-    printf "%i: " i;
     printList head;
     printf "\n";
     print_list_string (body) (i+1)
     end
     ;;
+let  createprgm myList i = match myList with
+    | [] -> print_endline "Programme crée"
+    | "COMMENT" ::  s -> print_string "COMMENTAIRE" (*TODO GO UNTIL NEXT EXPRESSION HORS DU COMMENTAIRE*)
+    | "READ" :: s -> print_string "c'est read" (*Creer une var de type Read of name*)
+    | "IF" :: s -> print_string "c'est if" (*Creer un nouveau bloc contenant la condition de comparaison + les 2 blocs à effectuer*)
+    | "ELSE" :: s -> print_string "c'est else"
+    | "WHILE" :: s -> print_string "c'est while"
 
+    | _ -> printf "to"
 let main () =
   match Sys.argv with
   | [|_;"-reprint";file|] -> print_list_string(myread(file)) (1)
@@ -103,3 +116,5 @@ let main () =
 
 (* lancement de ce main *)
 let () = main ()
+
+(*TODO Delete all comments with a function.*)
