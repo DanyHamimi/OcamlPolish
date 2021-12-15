@@ -310,7 +310,6 @@ let printOP comparaison ex1 ex2 =
                               print_cond c;
                               print_newline();
                               print_polishBlock b;
-                              print_newline();
                               print_polishBlock (next);;
 let print_polish (p:program) : unit = print_polishBlock p
 
