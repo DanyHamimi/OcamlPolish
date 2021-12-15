@@ -9,47 +9,9 @@
 
 
 open Printf
+open Type
 
 (** Position : numéro de ligne dans le fichier, débutant à 1 *)
-type position = int
-
-(** Nom de variable *)
-type name = string
-
-(** Opérateurs arithmétiques : + - * / % *)
-type op = Add | Sub | Mul | Div | Mod
-
-(** Expressions arithmétiques *)
-type expr =
-  | Num of int
-  | Var of name
-  | Op of op * expr * expr
-
-(** Opérateurs de comparaisons *)
-type comp =
-| Eq (* = *)
-| Ne (* Not equal, <> *)
-| Lt (* Less than, < *)
-| Le (* Less or equal, <= *)
-| Gt (* Greater than, > *)
-| Ge (* Greater or equal, >= *)
-
-(** Condition : comparaison entre deux expressions *)
-type cond = expr * comp * expr
-
-(** Instructions *)
-type instr =
-  | Set of name * expr
-  | Read of name
-  | Print of expr
-  | If of cond * block * block
-  | While of cond * block
-and block = (position * instr) list
-
-(** Un programme Polish est un bloc d'instructions *)
-type program = block
-
-
 (***********************************************************************)
 (*renvoie tout un tab sans le premiere élément*)
 let getNextTab(s: string list) : string list = 
@@ -72,11 +34,6 @@ let myread (name:string) : string list =
     | Some s -> loop (s :: acc)
     | None -> close_in ic; List.rev acc in
   loop []
-
-
-
-
-
 
 let usage () =
   print_string "Polish : analyse statique d'un mini-langage\n";
@@ -163,15 +120,6 @@ let rec getFristCmd l j= match l with
     end
     ;;
 
-
-(*let retRead List = Rea*)
-
-
-(*let ifStatement (fileString:string list) (pos:int)*)
-(*Si après l'espace c'est direct un int on fait ça*)
-
-(*Si après l'espace c'est une opé on fait ça*)
-
 let setInstr(inst:string list) : instr =
   match inst with
     |[] -> failwith "instr vide"
@@ -186,9 +134,6 @@ let returnComp(s:string) : comp =
    |">"  -> Gt
    |">=" -> Ge
    |_    ->failwith "erreur pas de comp"
-
-
-
 
 (*se déplace de 'ind' espace, ind correspondant  *)
 let rec moveIndent (line:string list)(ind:int): string list=
@@ -283,8 +228,66 @@ let rec print_list_string myList i= match myList with
       let (prg, reste) = returnPrgm (myread(filename)) 1 0
       in match reste with
          | [] -> prg
-         | _ -> failwith "parsing incomplet"                     
+         | _ -> failwith "parsing incomplet"   
+let rec printex exp = 
+  match exp with 
+  |Num(n) -> myprint(string_of_int n)
+  |Var(s) -> myprint(s)
+  |Op(op1,ex1,ex2)-> print_expB op1 ex1 ex2;
+  and
+  print_expB op1 ex1 ex2=
+    match op1 with
+      | Add -> myprint("+ "); 
+               printex ex1;
+               myprint(" ");
+               printex ex2
+      | Sub -> myprint("- ");
+               printex ex1;
+               myprint(" ");
+               printex ex2
+      | Mul -> myprint("* ");
+               printex ex1;
+               myprint(" ");
+               printex ex2
+      | Div -> myprint("/ ");
+               printex ex1;
+               myprint(" ");
+               printex ex2
+      | Mod -> myprint("% ");
+               printex ex1;
+               myprint(" ");
+               printex ex2
 
+let printOP comparaison ex1 ex2 = 
+  match comparaison with
+  | Eq -> printex ex1;
+          myprint(" = ");
+          printex ex2
+  | Ne -> printex ex1;
+          myprint(" <> ");
+          printex ex2
+  | Lt -> printex ex1;
+          myprint(" < ");
+          printex ex2
+  | Gt -> printex ex1;
+          myprint(" > ");
+          printex ex2
+  | Ge -> printex ex1;
+          myprint(" >= ");
+          printex ex2
+  | Le -> printex ex1;
+          myprint(" <= ");
+          printex ex2
+  let print_polishBlock blocka =
+    match blocka with
+    | [] -> ();
+    | (v,i)::ss -> match i with
+              |Set(n,e) -> myprint(n);
+                             myprint(" :=");
+                             printex e;
+                             print_newline();
+                             (*blocka y;*)
+              | _ -> ()
 let print_polish (p:program) : unit = failwith "TODO"
 
 let eval_polish (p:program) : unit = failwith "TODO"
