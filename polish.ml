@@ -10,7 +10,6 @@
 
 open Printf
 
-
 (** Position : numéro de ligne dans le fichier, débutant à 1 *)
 type position = int
 
@@ -53,8 +52,15 @@ type program = block
 
 (***********************************************************************)
 
-                 
-
+let getNextTab(s: string list) : string list = 
+  match s with
+    | [] -> failwith "tab vide"
+    | head::body ->
+    begin
+      match body with
+      | [] -> failwith "pas de suite"
+      | _ -> body
+    end                
 let myread (name:string) : string list =
   let ic = open_in name in
   let try_read () =
@@ -65,14 +71,9 @@ let myread (name:string) : string list =
   loop []
 
 
-
 let t = "testest"
 
-let read_polish (filename:string) : program = failwith (t)
 
-let print_polish (p:program) : unit = failwith "TODO"
-
-let eval_polish (p:program) : unit = failwith "TODO"
 
 let usage () =
   print_string "Polish : analyse statique d'un mini-langage\n";
@@ -80,17 +81,43 @@ let usage () =
 
 let myprint s =  printf "%s " s
 
+let test (salut: expr) =  match salut with
+|Num _ -> printf"VARIABLE SIMPLE";
+|Var _ -> printf"JUSTE NOM VAR NON CALCULEE"
+|Op _ -> printf"RESULTAT D UN CALCUL"
 
 
-
-
+let makeint val1 = 
+  try 
+    Some(int_of_string val1) (*Expr : INT*)
+  with Failure _ -> None
+let checkOP (val2:string) = 
+  match val2 with
+    |"soustraction" -> Some(Sub)
+    |"addition" -> Some(Add)
+    |"division" -> Some(Div)
+    |"multiplication" -> Some(Mul)
+    |"modulo" ->  Some(Mod)
+    | _ -> None
 let getListWord s = String.split_on_char (' ') s (*list de tout les mots de s*)
 let printFirstWord s = List.hd(getListWord(s))
-  
+let rec returnfirstOP (s:string list)(s1 : string) :string = match s with
+  | [] -> s1
+  | head::body ->
+    begin
+      match head with
+        |"" -> "vide"
+        |"-" -> "soustraction"
+        |"+" -> "addition"
+        |"/" -> "division"
+        |"*" -> "multiplication"
+        |"%" -> "modulo"
+        | _ -> returnfirstOP (body) (head)
+    end
 
 let cmd s = match s with
   | "COMMENT" -> print_endline "sup"
-  | "READ" -> print_endline "lecture"
+  | "READ" -> print_endline "lecture" 
   | "IF" -> print_endline "si"
   | "ELSE" -> print_endline "sinon"
   | "WHILE" -> print_endline "Pendant"
@@ -99,22 +126,61 @@ let cmd s = match s with
   | "" -> print_string "rien"
   | _ -> print_string "rien"
   
+let rec function2 s = match s with
+  | [] -> print_endline "-ligne vide-"
+  | head::body ->
+    begin
+      match head with
+        |"" -> printf"vide"
+        |"-" -> printf"soustraction"
+        |"+" -> printf"addition"
+        |"/" -> printf"division"
+        | _ ->  myprint (head);
+                function2 body;
+    end
+let rec getOpes (s: string list) : string list = 
+  match s with
+    | [] -> failwith "error"
+    | head::body ->
+      begin
+        match head with
+        | ":=" -> getNextTab(body)
+        | _ -> getOpes body
+      end
+let rec makeExpr (task : string list) :expr =
+  match task with 
+  | [] -> failwith "vide"
+  | _ -> match makeint (returnfirstOP task (List.hd(task))) with
+    | Some n -> (Num n) (*Dans le cas ou l'expression makeint return une val directement on prend le case Num*)
+    | None ->
+      match checkOP (returnfirstOP task (List.hd(task))) with
+      | Some ope -> Op(ope,(makeExpr (getOpes task)),(makeExpr (getNextTab(getOpes task))))  
+      | None -> Var(returnfirstOP task (List.hd(task)))
 let rec getFristCmd l j= match l with
   | [] -> print_endline "-ligne vide-"
   | head::body -> 
     begin
       match head with
         |"" -> getFristCmd body (j+1)
-        | _ -> printf "%s                   nombre d'espace: %i" head (j/2)
+        |"COMMENT" -> printf"non"
+        |"READ" -> printf"%s" (List.hd(body))
+        |"IF" -> printf"if.."
+        |"ELSE" -> printf"else.."
+        |"PRINT" -> myprint(List.hd(getOpes(body)))
+        | _ -> printf "s"
     end
     ;;
-
 
 
 (*let retRead List = Rea*)
 
 
-let ifStatement (fileString:string list) (pos:int)
+(*let ifStatement (fileString:string list) (pos:int)*)
+(*Si après l'espace c'est direct un int on fait ça*)
+
+(*Si après l'espace c'est une opé on fait ça*)
+
+
 
 let rec returnPrgm(fileString:string list) (pos:int) : program =
   match fileString with
@@ -125,12 +191,11 @@ let rec returnPrgm(fileString:string list) (pos:int) : program =
       |h::t->
         match h with
           | "COMMENT" -> returnPrgm(body) (pos+1)
-          | "READ" ->  [pos,Read "toto"]@returnPrgm(body) (pos+1)
-          | "PRINT" -> [pos,]@returnPrgm(body) (pos+1)
-          | "IF"
-          | "WHILE"
-          | _ -> failwith("marche pas")
-          
+          | "READ" ->  [pos,Read h]@returnPrgm(body) (pos+1)
+          | "PRINT" -> [pos,Print (makeExpr(String.split_on_char (' ') h))]@returnPrgm(body) (pos+1)
+          (*| "IF"
+          | "WHILE"*)
+          | _ -> [pos,Set (h,makeExpr(String.split_on_char (' ') h))]@returnPrgm(body) (pos+1)
       
   
 
@@ -155,10 +220,14 @@ let rec print_list_string myList i= match myList with
     ;;
 
 
+let read_polish (filename:string) : program = returnPrgm (myread(filename)) 1
 
+let print_polish (p:program) : unit = failwith "TODO"
+
+let eval_polish (p:program) : unit = failwith "TODO"
 let main () =
   match Sys.argv with
-  | [|_;"-reprint";file|] -> print_polish (read_polish file)
+  | [|_;"-reprint";file|] -> print_list_string(myread(file)) (1)
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
   | _ -> usage()
 
