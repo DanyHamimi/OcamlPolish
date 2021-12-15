@@ -91,6 +91,7 @@ let makeint val1 =
   try 
     Some(int_of_string val1) (*Expr : INT*)
   with Failure _ -> None
+  
 let checkOP (val2:string) = 
   match val2 with
     |"soustraction" -> Some(Sub)
@@ -101,6 +102,7 @@ let checkOP (val2:string) =
     | _ -> None
 let getListWord s = String.split_on_char (' ') s (*list de tout les mots de s*)
 let printFirstWord s = List.hd(getListWord(s))
+
 let rec returnfirstOP (s:string list)(s1 : string) :string = match s with
   | [] -> s1
   | head::body ->
@@ -140,22 +142,43 @@ let rec function2 s = match s with
     end
 let rec getOpes (s: string list) : string list = 
   match s with
-    | [] -> failwith "error"
+    | [] -> failwith "errortoto"
     | head::body ->
       begin
         match head with
         | ":=" -> getNextTab(body)
         | _ -> getOpes body
       end
-let rec makeExpr (task : string list) :expr =
+
+let retBod (s: string list): string list =
+  match s with
+    |[]->[]
+    |head::body->body
+
+(*let rec makeExpr (task : string list) :(expr * string list)=
   match task with 
   | [] -> failwith "vide"
   | _ -> match makeint (returnfirstOP task (List.hd(task))) with
-    | Some n -> (Num n) (*Dans le cas ou l'expression makeint return une val directement on prend le case Num*)
+    | Some n -> ((Num n),(retBod task))(*Dans le cas ou l'expression makeint return une val directement on prend le case Num*)
     | None ->
       match checkOP (returnfirstOP task (List.hd(task))) with
-      | Some ope -> Op(ope,(makeExpr (getOpes task)),(makeExpr (getNextTab(getOpes task))))  
-      | None -> Var(returnfirstOP task (List.hd(task)))
+      | Some ope -> let(e1,reste1)=makeExpr (getOpes task) in let(e2,reste2)=makeExpr (getNextTab(getOpes task)) in 
+        (Op(ope,e1,e2),(retBod task))
+      | None -> (Var(returnfirstOP task (List.hd(task))),(retBod task))*)
+
+let rec makeExpr (task: string list) : (expr * string list) =
+  match task with
+  | [] -> failwith "vide"
+  | h :: b ->
+     match makeint h with
+     | Some n -> (Num n, b)
+     | None ->
+        match checkOP (returnfirstOP task h) with
+        | Some op -> let (e1,tks1) = makeExpr b in
+                 let (e2,tks2) = makeExpr tks1 in
+                 (Op (op, e1, e2), tks2)
+        | None -> (Var h, b)      
+
 let rec getFristCmd l j= match l with
   | [] -> print_endline "-ligne vide-"
   | head::body -> 
@@ -164,9 +187,9 @@ let rec getFristCmd l j= match l with
         |"" -> getFristCmd body (j+1)
         |"COMMENT" -> printf"non"
         |"READ" -> printf"%s" (List.hd(body))
-        |"IF" -> printf"if.."
+        |"IF" -> printf "if...%i" j
         |"ELSE" -> printf"else.."
-        |"PRINT" -> myprint(List.hd(getOpes(body)))
+        |"PRINT" -> printf"%s...%i" (List.hd(body)) (j)
         | _ -> printf "s"
     end
     ;;
@@ -180,30 +203,75 @@ let rec getFristCmd l j= match l with
 
 (*Si après l'espace c'est une opé on fait ça*)
 
+let setInstr(inst:string list) : instr =
+  match inst with
+    |[] -> failwith "instr vide"
+    |head::body -> let (expr,reste)= makeExpr(body) in Set (head,expr)
+
+let returnComp(s:string) : comp = 
+  match s with
+   |"="-> Eq
+   |"<>"-> Ne
+   |"<"-> Lt
+   |"<="-> Le
+   |">"-> Gt
+   |">="-> Ge
+   |_->failwith "erreur pas de comp"
 
 
-let rec returnPrgm(fileString:string list) (pos:int) : program =
+let returnCond (condL:string list) : cond  =
+  match condL with
+   |[] -> failwith "cond vide" 
+   |_ -> let (ex1, reste) = makeExpr(condL) in 
+    match reste with
+      |[]->failwith("pas de cond")
+      |head::body-> let (ex2,reste)=makeExpr(body) in (ex1,(returnComp head),ex2)
+
+
+
+
+let rec moveIndent (line:string list)(ind:int): string list=
+  if ind<>0 then
+    match line with 
+      |[]->failwith"err"
+      |head::body->moveIndent body (ind-1)
+  else    
+    line
+
+
+
+let moveBod (line:string list)(mov:int): string list=
+if mov<>0 then
+    match line with 
+      |[]->failwith"err"
+      |head::body->moveIndent body (mov-1)
+  else    
+    line
+
+let iMov = 0
+
+(*let returnMoveBody (s:string list) (pos:int) (indent:int) : program = let iMov=iMov+1 in returnPrgm s (pos) (indent)*)
+ 
+let rec returnPrgm(fileString:string list) (pos:int) (indent:int) : program =
   match fileString with
   |[]->[]
   |head::body->
-    match getListWord(head) with
+    match moveIndent(getListWord(head)) (indent) with
       |[]->  failwith("marche pas")
       |h::t->
         match h with
-          | "COMMENT" -> returnPrgm(body) (pos+1)
-          | "READ" ->  [pos,Read h]@returnPrgm(body) (pos+1)
-          | "PRINT" -> [pos,Print (makeExpr(String.split_on_char (' ') h))]@returnPrgm(body) (pos+1)
-          (*| "IF"
-          | "WHILE"*)
-          | _ -> [pos,Set (h,makeExpr(String.split_on_char (' ') h))]@returnPrgm(body) (pos+1)
+          | "COMMENT" -> returnPrgm(body) (pos+1) indent
+          | "READ" ->  [pos,Read (List.hd t)]@returnPrgm(body) (pos+1) indent 
+          | "PRINT" -> let (expr, reste)=makeExpr(t) in [pos,Print (expr)]@returnPrgm(body) (pos+1) indent 
+          (*| "IF" -> let cnd = returnCond(t) in 
+            let (block1) = returnPrgm (body (pos+1) (indent+2) ) in *)
+          | "WHILE" -> let cnd = returnCond(t) in
+            [pos,While (cnd,returnPrgm body (pos+1) (indent+2) )]@returnPrgm(body) (pos+1) indent 
+          |""->returnPrgm(body) (pos+1) indent 
+          | _ -> [pos, setInstr(t)]@returnPrgm (body) (pos+1) indent 
       
   
 
-(*let readPers (filename:string) : program =
-  let line = 1 in
-    match myread(filename) with
-      | [] -> []
-      | _ -> []*)
        
 
 
@@ -220,14 +288,14 @@ let rec print_list_string myList i= match myList with
     ;;
 
 
-let read_polish (filename:string) : program = returnPrgm (myread(filename)) 1
+let read_polish (filename:string) : program = returnPrgm (myread(filename)) 1 0 
 
 let print_polish (p:program) : unit = failwith "TODO"
 
 let eval_polish (p:program) : unit = failwith "TODO"
 let main () =
   match Sys.argv with
-  | [|_;"-reprint";file|] -> print_list_string(myread(file)) (1)
+  | [|_;"-reprint";file|] -> print_polish(read_polish(file))
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
   | _ -> usage()
 

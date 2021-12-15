@@ -1,10 +1,10 @@
 # dune build polish.exe
 # OCAMLPARAM: unset
 # Workspace root: /home/rayane/DEV/Ocaml/pf5-projet
-$ /usr/bin/nproc > /tmp/dune5ed253.output 2> /dev/null
+$ /usr/bin/nproc > /tmp/dunec5667b.output 2> /dev/null
 # Auto-detected concurrency: 6
 # disable binary cache
-$ /usr/bin/ocamlc.opt -config > /tmp/dunec82158.output
+$ /usr/bin/ocamlc.opt -config > /tmp/dune0e2884.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
