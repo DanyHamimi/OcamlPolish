@@ -173,7 +173,7 @@ let rec returnPrgm (fileString:string list) (pos:int) (indent:int) : (program * 
      then ([], fileString)
      else
        let ii = getIndent (getListWord head)
-       in printf "parsing ind:%d '%s'\n" ii head;
+       in ()(***);
       match moveIndent (getListWord head) indent with
       | []   -> failwith("marche pas")
       | h::t ->
@@ -278,17 +278,41 @@ let printOP comparaison ex1 ex2 =
   | Le -> printex ex1;
           myprint(" <= ");
           printex ex2
-  let print_polishBlock blocka =
+  let print_cond c :unit=
+    let (ex1,cmp1,ex2) = c in 
+      printOP cmp1 ex1 ex2
+  ;; 
+  let rec print_polishBlock (blocka:block)=
     match blocka with
     | [] -> ();
-    | (v,i)::ss -> match i with
+    | (v,i)::next -> match i with
               |Set(n,e) -> myprint(n);
-                             myprint(" :=");
-                             printex e;
-                             print_newline();
-                             (*blocka y;*)
-              | _ -> ()
-let print_polish (p:program) : unit = failwith "TODO"
+                           myprint(" :=");
+                           printex e;
+                           print_newline();
+                           print_polishBlock (next);
+              | Read(n) -> myprint("READ");myprint(n);
+                           print_newline();
+                           print_polishBlock (next);
+              | Print(e) -> myprint("PRINT ");
+                            printex e;
+                            print_newline();
+                            print_polishBlock (next);
+              | If(c,b1,b2) -> myprint("IF");
+                               print_cond c;
+                               print_newline();
+                               print_polishBlock b1;
+                               myprint("ELSE");
+                               print_newline();
+                               print_polishBlock b2;
+                               print_polishBlock (next);
+              | While(c,b) -> myprint("WHILE");
+                              print_cond c;
+                              print_newline();
+                              print_polishBlock b;
+                              print_newline();
+                              print_polishBlock (next);;
+let print_polish (p:program) : unit = print_polishBlock p
 
 let eval_polish (p:program) : unit = failwith "TODO"
 let main () =
@@ -298,5 +322,4 @@ let main () =
   | _ -> usage()
 
 (* lancement de ce main *)
-
 let () = main ()
