@@ -120,10 +120,10 @@ let rec getFristCmd l j= match l with
     end
     ;;
 
-let setInstr(inst:string list) : instr =
+let setInstr(inst:string list)(nameV:string) : instr =
   match inst with
     |[] -> failwith "instr vide"
-    |head::body -> let (expr,reste)= makeExpr(body) in Set (head,expr)
+    |head::body -> let (expr,reste)= makeExpr(body) in Set (nameV,expr)
 
 let returnComp(s:string) : comp = 
   match s with
@@ -207,7 +207,7 @@ let rec returnPrgm (fileString:string list) (pos:int) (indent:int) : (program * 
              | [] -> ([],[]))
           | _ ->
              let (prg, reste) = returnPrgm body (pos+1) indent in 
-             ((pos, setInstr(t)) :: prg, reste)
+             ((pos, setInstr(t) (h)) :: prg, reste)
 
 
       
