@@ -316,17 +316,22 @@ let my_hash = Hashtbl.create 0;;
 let findInTableVal (valExp:expr) : string =
   match valExp with 
   (*|Num(n) -> (string_of_int n)*)
-    |Var(s) -> (s)
+    |Var(s) -> (s);
     |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
               string_of_int(i)
-    | _ -> ""
+    |Op(op,ex1,ex2) -> string_of_int(1)(*Hashtbl.replace my_hash "tmp" 1*) 
 
-let getVal1 (valExpr:expr) : int = 
+let rec getVal1 (valExpr:expr) : int = 
   match valExpr with 
   |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
              i
   |Var(n) -> Hashtbl.find my_hash n;
-  | _ -> 0
+  |Op(op,exp1,exp2) -> match op with
+                        | Add ->  getVal1 exp1 + getVal1 exp2;
+                        | Sub ->  getVal1 exp1 - getVal1 exp2;
+                        | Mul ->  getVal1 exp1 * getVal1 exp2;
+                        | Div ->  getVal1 exp1 / getVal1 exp2;
+                        | Mod ->  (getVal1 exp1) mod (getVal1 exp2)
 
 let rec getValExprs (valExpr:expr) = 
   match valExpr with
