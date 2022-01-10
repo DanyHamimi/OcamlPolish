@@ -74,7 +74,7 @@ let cmd s = match s with
   | "" -> print_string "rien"
   | _ -> print_string "rien"
   
-
+(*Récupère les opérations*)
 let rec getOpes (s: string list) : string list = 
   match s with
     | [] -> failwith "errortoto"
@@ -90,7 +90,7 @@ let retBod (s: string list): string list =
     |[]->[]
     |head::body->body
 
-
+(*transforme une list de string en expr avec la suite*)
 let rec makeExpr (task: string list) : (expr * string list) =
   match task with
   | []     -> failwith "vide"
@@ -104,7 +104,7 @@ let rec makeExpr (task: string list) : (expr * string list) =
            let (e2, tks2) = makeExpr tks1 in
            (Op (op, e1, e2), tks2)
         | None -> (Var h, b)      
-
+(*récupère la premiere commande d'une ligne*)
 let rec getFristCmd l j= match l with
   | [] -> print_endline "-ligne vide-"
   | head::body -> 
@@ -119,12 +119,12 @@ let rec getFristCmd l j= match l with
         | _ -> printf "s"
     end
     ;;
-
+(*Définit une nouvelle instruction*)
 let setInstr(inst:string list)(nameV:string) : instr =
   match inst with
     |[] -> failwith "instr vide"
     |head::body -> let (expr,reste)= makeExpr(body) in Set (nameV,expr)
-
+(*Retourne le comparateur sous la forme d'un string*)
 let returnComp(s:string) : comp = 
   match s with
    |"="  -> Eq
@@ -152,7 +152,7 @@ let rec getIndent (words:string list) : int =
 
 
 (*string -> condition*)
- 
+ (*trouve la condition et la retourne*)
 let returnCond (condL:string list) : cond  =
   match condL with
    | [] -> failwith "cond vide" 
@@ -211,7 +211,7 @@ let rec returnPrgm (fileString:string list) (pos:int) (indent:int) : (program * 
 
 
       
-(*fonction de test*)
+(*Transformer une list en string*)
 let rec print_list_string myList i= match myList with
   | [] -> print_endline "Fin de fichier"
   | head::body -> 
@@ -223,8 +223,8 @@ let rec print_list_string myList i= match myList with
     end
     ;;
 
-
-    let read_polish (filename:string) : program =
+(*transforme un fichier donné en argument en program*)
+let read_polish (filename:string) : program =
       let (prg, reste) = returnPrgm (myread(filename)) 1 0
       in match reste with
          | [] -> prg
@@ -257,7 +257,7 @@ let rec printex exp =
                printex ex1;
                myprint(" ");
                printex ex2
-
+(*affiche les opération d'une comparaison*)
 let printOP comparaison ex1 ex2 = 
   match comparaison with
   | Eq -> printex ex1;
@@ -282,6 +282,7 @@ let printOP comparaison ex1 ex2 =
     let (ex1,cmp1,ex2) = c in 
       printOP cmp1 ex1 ex2
   ;; 
+(*affiche l'indentation avant la ligne de code dans print*)
 let rec print_ind (ind:int)  =  
   match ind with
     |0->myprint("")
@@ -289,7 +290,7 @@ let rec print_ind (ind:int)  =
         print_ind(ind-1)
   
 
-
+(*Affiche un block sous la forme de code*)
   let rec print_polishBlock (blocka:block) (ind:int)=
     match blocka with
     | [] -> ();
@@ -320,8 +321,13 @@ let rec print_ind (ind:int)  =
                               print_newline();
                               print_polishBlock b (ind+1);
                               print_polishBlock (next)(ind);;
+(*Table contenant toutes les variables et leurs valeurs*)
 let my_hash = Hashtbl.create 0;;
-
+(*Table contenant toutes les variables*)
+let map_allVals = Hashtbl.create 0;;
+(*Table contenant toutes les variables initialisées au moins une fois*)
+let map_errVals = Hashtbl.create 0;;
+(*récupère la valeur d'une expression donnée en argument*)
 let rec getVal1 (valExpr:expr) : int = 
   match valExpr with 
   |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
@@ -334,7 +340,7 @@ let rec getVal1 (valExpr:expr) : int =
                         | Div ->  getVal1 exp1 / getVal1 exp2;
                         | Mod ->  (getVal1 exp1) mod (getVal1 exp2)
                       
-                  
+(*trouver dans le tableau la valeur d'une exp*)   
 let findInTableVal (valExp:expr) : string =
   match valExp with 
   (*|Num(n) -> (string_of_int n)*)
@@ -349,27 +355,12 @@ let findInTableVal (valExp:expr) : string =
                             | Mod ->  string_of_int((getVal1 exp1) mod (getVal1 exp2))
 
 
-
-let rec getValExprsBis (valExpr:expr) : expr = 
-  match valExpr with
-    | Num(a) -> Num(a)
-    | Var(a) ->  if Hashtbl.mem my_hash a then Num( Hashtbl.find my_hash a) else Var(a)
-    | Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
-    and
-    calculB op1 ex1 ex2=
-      match op1 with
-        | Add ->  Num(getVal1 ex1 + getVal1 ex2);
-        | Sub ->  Num(getVal1 ex1 - getVal1 ex2);
-        | Mul ->  Num(getVal1 ex1 * getVal1 ex2);
-        | Div ->  Num(getVal1 ex1 / getVal1 ex2);
-        | Mod ->  Num((getVal1 ex1) mod (getVal1 ex2))
-
-
-let rec getValExprs (valExpr:expr)  =
+(*Récupérer la valeur d'une expression*)
+let rec getValExprs (valExpr:expr) = 
   match valExpr with
     | Num(a) -> a
-    | Var(a) -> Hashtbl.find my_hash a
-    | Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
+    | Var(a) ->  Hashtbl.find my_hash a
+    |Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
     and
     calculB op1 ex1 ex2=
       match op1 with
@@ -380,6 +371,7 @@ let rec getValExprs (valExpr:expr)  =
         | Mod ->  (getVal1 ex1) mod (getVal1 ex2)
 
 
+(*vérifie si la condition donnée en argument est valide ou non -> bool*)
 let checkCond(c:cond)=
       let (b1,comparasion,b2) = c in
       match comparasion with
@@ -419,7 +411,7 @@ let setVal (expression:expr) =
   match expression with
    | Num(i) -> 1;
    | _ -> 1
-
+(*affiche le résultat du calcul d'une expression*)
 let printExpCalc (expression:expr) = 
   match expression with 
   | Num(a) -> a
@@ -430,7 +422,7 @@ let printExpCalc (expression:expr) =
                       | Mul ->  getVal1 exp1 * getVal1 exp2;
                       | Div ->  getVal1 exp1 / getVal1 exp2;
                       | Mod ->  (getVal1 exp1) mod (getVal1 exp2)
-
+(*Prend un block en argument et affiche les résultats après "compilation"*)
 let rec evalPol(blocka:block): unit =
   match blocka with
   | [] -> ();
@@ -459,17 +451,82 @@ let rec evalPol(blocka:block): unit =
                             evalPol b
                           done;
                           evalPol (next);;
+(*ajoute un élément à la hashmap*)
+let rec addSousElem(expression:expr) = 
+  match expression with
+    | Num(i) -> ()
+    | Var(n) -> Hashtbl.replace map_allVals n 1;
+                Hashtbl.remove map_allVals "=";
+    | Op(op,exp1,exp2) -> addSousElem(exp1);
+                          addSousElem(exp2)
+let addElemFromCond(c:cond)=
+  let (b1,comparasion,b2) = c in
+  addSousElem(b1);
+  addSousElem(b2);;
+(*Permet de vérifier quels variables sont initialisées et ne le sont pas*)
+let rec var_polishBlock(blocka:block): unit = 
+  match blocka with
+  | [] ->();
+  | (v,i)::next -> match i with
+          |Set(n,e) ->
+                      Hashtbl.replace map_allVals n 1;
+                      Hashtbl.replace map_errVals n 1;
 
+                      addSousElem(e);
+                      var_polishBlock (next);
+          | Read(n) ->
+                      Hashtbl.replace map_errVals n 1;
+                      Hashtbl.replace map_allVals n 1;
+                      var_polishBlock (next);
+          | Print(e) -> addSousElem(e);
+                        var_polishBlock (next);
+          | If(c,b1,b2) ->
+                        addElemFromCond(c);
+                        var_polishBlock b1;
+                        var_polishBlock b2;
+                        var_polishBlock (next)
+          | While(c,b) ->
+                        addElemFromCond(c);
+                        var_polishBlock b;
+                        var_polishBlock (next);;
+let printamap(argc) = Hashtbl.iter (fun x y -> myprint x )argc;;
+let getotherlist(valarg) = 
+  let newTable = Hashtbl.create 0 in();
+  Hashtbl.iter (fun x y -> Printf.printf "%s -> %s\n" x y) newTable;
+  ;;
+let rec getValExprsBis (valExpr:expr) : expr = 
+  match valExpr with
+    | Num(a) -> Num(a)
+    | Var(a) ->  if Hashtbl.mem my_hash a then Num( Hashtbl.find my_hash a) else Var(a)
+    | Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
+    and
+    calculB op1 ex1 ex2=
+      match op1 with
+        | Add ->  Num(getVal1 ex1 + getVal1 ex2);
+        | Sub ->  Num(getVal1 ex1 - getVal1 ex2);
+        | Mul ->  Num(getVal1 ex1 * getVal1 ex2);
+        | Div ->  Num(getVal1 ex1 / getVal1 ex2);
+        | Mod ->  Num((getVal1 ex1) mod (getVal1 ex2))
+let var_polish (p:program) : unit = var_polishBlock p;
+                                    printf("Liste des variables utilisées : ");
+                                    printamap(map_allVals);
+                                    printf("\n");
+                                    printf("Liste des variables utilisées : ");
+                                    getotherlist(map_errVals);
+                                    printamap(map_errVals);
+                                    printf("\n");;
 let simpl_exp(e:expr) : expr= getValExprsBis (e);;
 let simpl_cond(c:cond) : cond = let (ex1,cmp1,ex2) = c in (simpl_exp(ex1),cmp1,simpl_exp(ex2));;
-
+let bisTable = Hashtbl.create 0;;
+(*Permet de simplifier toutes les expressions présentes dans le code*)
 let rec simpl_polish (p:program) (p2:program): program=
   match p with 
   |[]-> p2
   |(i,ins)::ps -> match ins with
                   |Set(n,e) -> Hashtbl.replace my_hash n (getValExprs(e));
                               simpl_polish ps ( p2@[(i,(Set(n,(simpl_exp e))))])
-                  |Read(n)  -> simpl_polish ps (p2@[(i,Read(n))])
+                  |Read(n)  ->  Hashtbl.replace my_hash n 1;
+                               simpl_polish ps (p2@[(i,Read(n))])
                   |Print(e) -> simpl_polish ps (p2@[(i,Print(simpl_exp e))])
                   |While(c,b) ->  (let c1=simpl_cond c in 
                                   let b1=simpl_polish b [] in 
@@ -482,15 +539,70 @@ let rec simpl_polish (p:program) (p2:program): program=
                                    match c1 with 
                                   |(exp1,comp,exp2) ->  simpl_polish ps (p2@[(i,If((exp1,comp,exp2),bs1,bs2))])                 
                   ;;
+let rec addSousElem(expression:expr) = 
+  match expression with
+    | Num(i) -> ()
+    | Var(n) -> Hashtbl.replace map_allVals n 1;
+                if(Hashtbl.mem map_errVals n) then () else Hashtbl.replace bisTable n 1;
+                Hashtbl.remove map_allVals "=";
+    | Op(op,exp1,exp2) -> addSousElem(exp1);
+                          addSousElem(exp2)
+let addElemFromCond(c:cond)=
+  let (b1,comparasion,b2) = c in
+  addSousElem(b1);
+  addSousElem(b2);;
+
+let rec var_polishBlock(blocka:block): unit = 
+  match blocka with
+  | [] ->();
+  | (v,i)::next -> match i with
+          |Set(n,e) ->
+                      Hashtbl.replace map_allVals n 1;
+                      Hashtbl.replace map_errVals n 1;
+                      addSousElem(e);
+                      var_polishBlock (next);
+          | Read(n) ->
+                      Hashtbl.replace map_errVals n 1;
+                      Hashtbl.replace map_allVals n 1;
+                      var_polishBlock (next);
+          | Print(e) -> addSousElem(e);
+                        var_polishBlock (next);
+          | If(c,b1,b2) ->
+                        addElemFromCond(c);
+                        var_polishBlock b1;
+                        var_polishBlock b2;
+                        var_polishBlock (next)
+          | While(c,b) ->
+                        addElemFromCond(c);
+                        var_polishBlock b;
+                        var_polishBlock (next);;
+let printamap(argc) = Hashtbl.iter (fun x y -> myprint x )argc;
+                      printf("\n");;
+let getotherlist(valarg) = 
+  let newTable = Hashtbl.create 0 in();
+  Hashtbl.iter (fun x y -> if(Hashtbl.mem map_errVals x) then () else Hashtbl.replace newTable x 1;) map_allVals;
+  newTable;
+  ;;
+let var_polish (p:program) : unit = var_polishBlock p;
+                                    printf("Liste des variables utilisées : ");
+                                    printamap(map_allVals);
+                                    printf("\n");
+                                    printf("Liste des variables non initialisées : ");
+                                    printamap(bisTable);
+                                    printf("\n");;
+
 
 let print_polish (p:program) : unit = print_polishBlock p 0
 
-let eval_polish (p:program) : unit = evalPol(p)
+let eval_polish (p:program) : unit = evalPol(p);;
 let main () =
   match Sys.argv with
   | [|_;"-reprint";file|] -> print_polish(read_polish(file))
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
+  | [|_;"-var";file|] -> var_polish (read_polish file)
   | [|_;"-simpl";file|] -> print_polish (simpl_polish(read_polish file)([]))
+  | [|_;"-vars";file|] -> var_polish (read_polish file)
+
   | _ -> usage()
 
 (* lancement de ce main *)
