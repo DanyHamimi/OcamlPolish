@@ -311,9 +311,114 @@ let printOP comparaison ex1 ex2 =
                               print_newline();
                               print_polishBlock b;
                               print_polishBlock (next);;
+let my_hash = Hashtbl.create 0;;
+
+let findInTableVal (valExp:expr) : string =
+  match valExp with 
+  (*|Num(n) -> (string_of_int n)*)
+    |Var(s) -> (s)
+    |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
+              string_of_int(i)
+    | _ -> ""
+
+let getVal1 (valExpr:expr) : int = 
+  match valExpr with 
+  |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
+             i
+  |Var(n) -> Hashtbl.find my_hash n;
+  | _ -> 0
+
+let rec getValExprs (valExpr:expr) = 
+  match valExpr with
+    | Num(a) -> a
+    | Var(a) ->  Hashtbl.find my_hash a
+    |Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
+    and
+    calculB op1 ex1 ex2=
+      match op1 with
+        | Add ->  getVal1 ex1 + getVal1 ex2;
+        | Sub ->  getVal1 ex1 - getVal1 ex2;
+        | Mul ->  getVal1 ex1 * getVal1 ex2;
+        | Div ->  getVal1 ex1 / getVal1 ex2;
+        | Mod ->  (getVal1 ex1) mod (getVal1 ex2)
+
+
+
+let checkCond(c:cond)=
+      let (b1,comparasion,b2) = c in
+      match comparasion with
+      | Eq -> if(Hashtbl.find my_hash (findInTableVal b1) == Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+      | Ne -> if(Hashtbl.find my_hash (findInTableVal b1) != Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+      | Lt -> if(Hashtbl.find my_hash (findInTableVal b1) < Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+      | Gt -> if(Hashtbl.find my_hash (findInTableVal b1) > Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+      | Ge -> if(Hashtbl.find my_hash (findInTableVal b1) >= Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+      | Le -> if(Hashtbl.find my_hash (findInTableVal b1) <= Hashtbl.find my_hash (findInTableVal b2)) then
+                true
+              else
+                false
+  let check_Cond c =
+    let (ex1,cmp1,ex2) = c in 
+      checkCond(cmp1 ex1 ex2)
+  ;; 
+
+
+
+
+let setVal (expression:expr) = 
+  match expression with
+   | Num(i) -> 1;
+   | _ -> 1
+
+let calculateBis = "Calcul en +";;
+let rec evalPol(blocka:block): unit =
+  match blocka with
+  | [] -> ();
+  | (v,i)::next -> match i with
+          |Set(n,e) ->
+                      Hashtbl.replace my_hash n (getValExprs(e));
+                      evalPol (next);
+          | Read(n) ->
+                      printf"Please enter a value for %s : " n;
+                      let nVal = read_int() in ();
+                      Hashtbl.replace my_hash n nVal;
+                      evalPol (next);
+          | Print(e) -> printex e;
+                        myprint(" = ");
+                        myprint(string_of_int((try (Hashtbl.find my_hash (findInTableVal e)) with Not_found->failwith calculateBis)));
+                        print_newline();
+                        evalPol (next);
+          | If(c,b1,b2) ->
+                          if(checkCond c) then
+                              evalPol b1
+                          else
+                              evalPol b2;
+                          evalPol (next);
+          | While(c,b) ->
+                          while(checkCond c) do
+                            evalPol b
+                          done;
+                          evalPol (next);;
+
+
+
 let print_polish (p:program) : unit = print_polishBlock p
 
-let eval_polish (p:program) : unit = failwith "TODO"
+let eval_polish (p:program) : unit = evalPol(p)
 let main () =
   match Sys.argv with
   | [|_;"-reprint";file|] -> print_polish(read_polish(file))
