@@ -10,43 +10,13 @@
 
 open Printf
 open Type
+open Func
 
 (** Position : numéro de ligne dans le fichier, débutant à 1 *)
 (***********************************************************************)
 (*renvoie tout un tab sans le premiere élément*)
-let getNextTab(s: string list) : string list = 
-  match s with
-    | [] -> failwith "tab vide"
-    | head::body ->
-    begin
-      match body with
-      | [] -> failwith "pas de suite"
-      | _ -> body
-    end  
-            
-    
-(*Ouvre le fichier et return une string list, de tout les lignes*)
-let myread (name:string) : string list =
-  let ic = open_in name in
-  let try_read () =
-    try Some (input_line ic) with End_of_file -> None in
-  let rec loop acc = match try_read () with
-    | Some s -> loop (s :: acc)
-    | None -> close_in ic; List.rev acc in
-  loop []
-
-let usage () =
-  print_string "Polish : analyse statique d'un mini-langage\n";
-  print_string "usage: à documenter (TODO)\n"
-
-let myprint s =  printf "%s " s
 
 
-(*String -> int*)
-let makeint val1 = 
-  try 
-    Some(int_of_string val1) (*Expr : INT*)
-  with Failure _ -> None
   
 (*Transforme un string en Op*)
 let checkOP (val2:string) = 
@@ -85,10 +55,7 @@ let rec getOpes (s: string list) : string list =
         | _ -> getOpes body
       end
 
-let retBod (s: string list): string list =
-  match s with
-    |[]->[]
-    |head::body->body
+
 
 (*transforme une list de string en expr avec la suite*)
 let rec makeExpr (task: string list) : (expr * string list) =
@@ -599,7 +566,6 @@ let main () =
   match Sys.argv with
   | [|_;"-reprint";file|] -> print_polish(read_polish(file))
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
-  | [|_;"-var";file|] -> var_polish (read_polish file)
   | [|_;"-simpl";file|] -> print_polish (simpl_polish(read_polish file)([]))
   | [|_;"-vars";file|] -> var_polish (read_polish file)
 

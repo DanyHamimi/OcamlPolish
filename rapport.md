@@ -2,7 +2,7 @@
 *HAMIMI Dany  (hamimi sur gaufre) 21952735
 Kaabeche Rayane (kaabeche sur gaufre) 21955498
 L3 Informatique Groupe 3
-Projet de PF5*
+Projet de Logique*
 
   
 
@@ -33,7 +33,7 @@ Vous pourrez ensuite lancer les différentes fonction à l'aide des lignes de co
 
 
 ## 3) Découpage modulaire :
-
+ Nous avons 3 fichier , un pour les type ( expr cond etc) et un pour les fonctions annexes (func.ml) et pour finir le fichier principale polish.ml qui contient les fonctions les plus importantes 
 
 ## 4) Organisation du travail :
 - Rayane KAABECHE : Fonction read , simpl et une partie de reprint 
