@@ -282,35 +282,44 @@ let printOP comparaison ex1 ex2 =
     let (ex1,cmp1,ex2) = c in 
       printOP cmp1 ex1 ex2
   ;; 
-  let rec print_polishBlock (blocka:block)=
+let rec print_ind (ind:int)  =  
+  match ind with
+    |0->myprint("")
+    |_->myprint("  ");
+        print_ind(ind-1)
+  
+
+
+  let rec print_polishBlock (blocka:block) (ind:int)=
     match blocka with
     | [] -> ();
-    | (v,i)::next -> match i with
+    | (v,i)::next -> print_ind(ind);
+    match i with
               |Set(n,e) -> myprint(n);
                            myprint(" :=");
                            printex e;
                            print_newline();
-                           print_polishBlock (next);
+                           print_polishBlock (next)(ind);
               | Read(n) -> myprint("READ");myprint(n);
                            print_newline();
-                           print_polishBlock (next);
+                           print_polishBlock (next)(ind);
               | Print(e) -> myprint("PRINT ");
                             printex e;
                             print_newline();
-                            print_polishBlock (next);
+                            print_polishBlock (next)(ind);
               | If(c,b1,b2) -> myprint("IF");
                                print_cond c;
-                               print_newline();
-                               print_polishBlock b1;
+                               print_newline(); 
+                               print_polishBlock b1 (ind+1);
                                myprint("ELSE");
                                print_newline();
-                               print_polishBlock b2;
-                               print_polishBlock (next);
+                               print_polishBlock b2 (ind+1);
+                               print_polishBlock (next)(ind);
               | While(c,b) -> myprint("WHILE");
                               print_cond c;
                               print_newline();
-                              print_polishBlock b;
-                              print_polishBlock (next);;
+                              print_polishBlock b (ind+1);
+                              print_polishBlock (next)(ind);;
 let my_hash = Hashtbl.create 0;;
 
 let rec getVal1 (valExpr:expr) : int = 
@@ -341,11 +350,26 @@ let findInTableVal (valExp:expr) : string =
 
 
 
-let rec getValExprs (valExpr:expr) = 
+let rec getValExprsBis (valExpr:expr) : expr = 
+  match valExpr with
+    | Num(a) -> Num(a)
+    | Var(a) ->  if Hashtbl.mem my_hash a then Num( Hashtbl.find my_hash a) else Var(a)
+    | Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
+    and
+    calculB op1 ex1 ex2=
+      match op1 with
+        | Add ->  Num(getVal1 ex1 + getVal1 ex2);
+        | Sub ->  Num(getVal1 ex1 - getVal1 ex2);
+        | Mul ->  Num(getVal1 ex1 * getVal1 ex2);
+        | Div ->  Num(getVal1 ex1 / getVal1 ex2);
+        | Mod ->  Num((getVal1 ex1) mod (getVal1 ex2))
+
+
+let rec getValExprs (valExpr:expr)  =
   match valExpr with
     | Num(a) -> a
-    | Var(a) ->  Hashtbl.find my_hash a
-    |Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
+    | Var(a) -> Hashtbl.find my_hash a
+    | Op(op1,ex1,ex2)-> calculB op1 ex1 ex2;
     and
     calculB op1 ex1 ex2=
       match op1 with
@@ -354,7 +378,6 @@ let rec getValExprs (valExpr:expr) =
         | Mul ->  getVal1 ex1 * getVal1 ex2;
         | Div ->  getVal1 ex1 / getVal1 ex2;
         | Mod ->  (getVal1 ex1) mod (getVal1 ex2)
-
 
 
 let checkCond(c:cond)=
@@ -437,15 +460,37 @@ let rec evalPol(blocka:block): unit =
                           done;
                           evalPol (next);;
 
+let simpl_exp(e:expr) : expr= getValExprsBis (e);;
+let simpl_cond(c:cond) : cond = let (ex1,cmp1,ex2) = c in (simpl_exp(ex1),cmp1,simpl_exp(ex2));;
 
+let rec simpl_polish (p:program) (p2:program): program=
+  match p with 
+  |[]-> p2
+  |(i,ins)::ps -> match ins with
+                  |Set(n,e) -> Hashtbl.replace my_hash n (getValExprs(e));
+                              simpl_polish ps ( p2@[(i,(Set(n,(simpl_exp e))))])
+                  |Read(n)  -> simpl_polish ps (p2@[(i,Read(n))])
+                  |Print(e) -> simpl_polish ps (p2@[(i,Print(simpl_exp e))])
+                  |While(c,b) ->  (let c1=simpl_cond c in 
+                                  let b1=simpl_polish b [] in 
+                                  match c1 with 
+                                  |(exp1,comp,exp2 )->  simpl_polish ps (p2@[(i,While((exp1,comp,exp2),b1))])
+                                  )
+                  |If(c,b1,b2)->  let bs1=simpl_polish b1 [] in
+                                  let bs2=simpl_polish b2 [] in 
+                                  let c1= simpl_cond c in
+                                   match c1 with 
+                                  |(exp1,comp,exp2) ->  simpl_polish ps (p2@[(i,If((exp1,comp,exp2),bs1,bs2))])                 
+                  ;;
 
-let print_polish (p:program) : unit = print_polishBlock p
+let print_polish (p:program) : unit = print_polishBlock p 0
 
 let eval_polish (p:program) : unit = evalPol(p)
 let main () =
   match Sys.argv with
   | [|_;"-reprint";file|] -> print_polish(read_polish(file))
   | [|_;"-eval";file|] -> eval_polish (read_polish file)
+  | [|_;"-simpl";file|] -> print_polish (simpl_polish(read_polish file)([]))
   | _ -> usage()
 
 (* lancement de ce main *)
