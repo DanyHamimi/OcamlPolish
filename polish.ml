@@ -313,14 +313,6 @@ let printOP comparaison ex1 ex2 =
                               print_polishBlock (next);;
 let my_hash = Hashtbl.create 0;;
 
-let findInTableVal (valExp:expr) : string =
-  match valExp with 
-  (*|Num(n) -> (string_of_int n)*)
-    |Var(s) -> (s);
-    |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
-              string_of_int(i)
-    |Op(op,ex1,ex2) -> string_of_int(1)(*Hashtbl.replace my_hash "tmp" 1*) 
-
 let rec getVal1 (valExpr:expr) : int = 
   match valExpr with 
   |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
@@ -332,6 +324,22 @@ let rec getVal1 (valExpr:expr) : int =
                         | Mul ->  getVal1 exp1 * getVal1 exp2;
                         | Div ->  getVal1 exp1 / getVal1 exp2;
                         | Mod ->  (getVal1 exp1) mod (getVal1 exp2)
+                      
+                  
+let findInTableVal (valExp:expr) : string =
+  match valExp with 
+  (*|Num(n) -> (string_of_int n)*)
+    |Var(s) -> (s);
+    |Num(i) -> Hashtbl.replace my_hash (string_of_int i) i;
+              string_of_int(i)
+    |Op(op,exp1,exp2) ->  match op with
+                            | Add ->  string_of_int(getVal1 exp1 + getVal1 exp2);
+                            | Sub ->  string_of_int(getVal1 exp1 - getVal1 exp2);
+                            | Mul ->  string_of_int(getVal1 exp1 * getVal1 exp2);
+                            | Div ->  string_of_int(getVal1 exp1 / getVal1 exp2);
+                            | Mod ->  string_of_int((getVal1 exp1) mod (getVal1 exp2))
+
+
 
 let rec getValExprs (valExpr:expr) = 
   match valExpr with
@@ -389,7 +397,17 @@ let setVal (expression:expr) =
    | Num(i) -> 1;
    | _ -> 1
 
-let calculateBis = "Calcul en +";;
+let printExpCalc (expression:expr) = 
+  match expression with 
+  | Num(a) -> a
+  | Var(a) ->  Hashtbl.find my_hash a
+  | Op(op,exp1,exp2) ->  match op with
+                      | Add ->  getVal1 exp1 + getVal1 exp2;
+                      | Sub ->  getVal1 exp1 - getVal1 exp2;
+                      | Mul ->  getVal1 exp1 * getVal1 exp2;
+                      | Div ->  getVal1 exp1 / getVal1 exp2;
+                      | Mod ->  (getVal1 exp1) mod (getVal1 exp2)
+
 let rec evalPol(blocka:block): unit =
   match blocka with
   | [] -> ();
@@ -404,7 +422,7 @@ let rec evalPol(blocka:block): unit =
                       evalPol (next);
           | Print(e) -> printex e;
                         myprint(" = ");
-                        myprint(string_of_int((try (Hashtbl.find my_hash (findInTableVal e)) with Not_found->failwith calculateBis)));
+                        myprint(string_of_int(printExpCalc(e)));
                         print_newline();
                         evalPol (next);
           | If(c,b1,b2) ->
