@@ -1,8 +1,8 @@
 
-*HAMIMI Dany  (hamimi sur gaufre) 21952735
-Kaabeche Rayane (kaabeche sur gaufre) 21955498
+*HAMIMI Dany 
+Kaabeche Rayane
 L3 Informatique Groupe 3
-Projet de Logique*
+Projet de programmation fonctionnelle*
 
   
 
